@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DU B unit 10th exam test</title>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --secondary: #ec4899;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      --card-bg: rgba(255, 255, 255, 0.07);
+      --card-border: rgba(255, 255, 255, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --correct-bg: rgba(34, 197, 94, 0.2);
+      --correct-border: #22c55e;
+      --correct-text: #4ade80;
+
+      --wrong-bg: rgba(239, 68, 68, 0.2);
+      --wrong-border: #ef4444;
+      --wrong-text: #f87171;
+
+      --skipped-bg: rgba(245, 158, 11, 0.2);
+      --skipped-border: #f59e0b;
+      --skipped-text: #fbbf24;
+
+      --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Hind Siliguri', 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 12px;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Floating Background Elements */
+    .ambient-bg {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .circle-1, .circle-2 {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.35;
+      animation: float 10s infinite alternate ease-in-out;
+    }
+
+    .circle-1 {
+      width: 380px;
+      height: 380px;
+      background: #4f46e5;
+      top: -50px;
+      left: -50px;
+    }
+
+    .circle-2 {
+      width: 420px;
+      height: 420px;
+      background: #db2777;
+      bottom: -100px;
+      right: -50px;
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 50px) scale(1.1); }
+    }
+
+    /* Main Glass Card Container */
+    .quiz-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      width: 100%;
+      max-width: 840px;
+      border-radius: 24px;
+      box-shadow: var(--glass-shadow);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* Welcome Screen */
+    .user-info-screen {
+      text-align: center;
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .welcome-title {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.3;
+      background: linear-gradient(to right, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 28px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 24px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #818cf8;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .user-input {
+      width: 100%;
+      padding: 16px 20px 16px 52px;
+      font-size: 16px;
+      color: var(--text-main);
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .user-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .btn-glow {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(236, 72, 153, 0.5);
+    }
+
+    /* Top Bar & Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .student-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-pill {
+      font-size: 14px;
+      font-weight: 700;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Question & Option Styles */
+    .question-box {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 22px;
+      color: #ffffff;
+      min-height: 56px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 15px 18px;
+      font-size: 16px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: #818cf8;
+      background: rgba(99, 102, 241, 0.12);
+      transform: translateX(3px);
+    }
+
+    /* Instant Feedback Specific Styles */
+    .option-btn.correct-opt {
+      background: var(--correct-bg) !important;
+      border-color: var(--correct-border) !important;
+      color: var(--correct-text) !important;
+      font-weight: 600;
+    }
+
+    .option-btn.wrong-opt {
+      background: var(--wrong-bg) !important;
+      border-color: var(--wrong-border) !important;
+      color: var(--wrong-text) !important;
+      font-weight: 600;
+    }
+
+    .option-btn.disabled-opt {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    /* Navigation Action Bar */
+    .nav-actions {
+      margin-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .skip-btn {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--skipped-text);
+    }
+
+    .skip-btn:hover {
+      background: rgba(245, 158, 11, 0.25) !important;
+    }
+
+    .submit-exam-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+      transition: all 0.2s;
+      display: none;
+    }
+
+    .submit-exam-btn:hover {
+      transform: scale(1.03);
+    }
+
+    /* Result Screen */
+    .result-screen {
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .score-circle {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(236,72,153,0.1) 100%);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.35);
+    }
+
+    .score-circle .number {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(to right, #818cf8, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .score-details-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 8px;
+      border-radius: 14px;
+    }
+
+    .stat-card .val {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* Review Accordion */
+    .review-section {
+      margin-top: 24px;
+      text-align: left;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .review-section::-webkit-scrollbar {
+      width: 6px;
+    }
+    .review-section::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+    }
+
+    .review-item {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .review-item.is-correct { border-left: 4px solid var(--correct-border); }
+    .review-item.is-wrong { border-left: 4px solid var(--wrong-border); }
+    .review-item.is-skipped { border-left: 4px solid var(--skipped-border); }
+
+    .review-q { font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .review-ans { color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: rgba(30, 27, 75, 0.95);
+      border: 1px solid var(--card-border);
+      padding: 28px;
+      border-radius: 20px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .score-details-grid { grid-template-columns: repeat(2, 1fr); }
+      .quiz-card { padding: 22px 16px; }
+      .welcome-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Effects -->
+  <div class="ambient-bg">
+    <div class="circle-1"></div>
+    <div class="circle-2"></div>
+  </div>
+
+  <div class="quiz-card">
+    
+    <!-- 1. Name Input / Welcome View -->
+    <div id="user-info-view" class="user-info-screen">
+      <div class="badge-tag">
+        <i class="fa-solid fa-graduation-cap"></i> DU B UNIT MODEL TEST
+      </div>
+      <h1 class="welcome-title">10 number exam</h1>
+      <p class="welcome-subtitle">including gk, bangla, english</p>
+      
+      <div class="input-wrapper">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" id="user-name" class="user-input" placeholder="Write your name..." autocomplete="off" onkeypress="handleEnter(event)">
+      </div>
+      
+      <button class="btn-glow" id="start-btn" onclick="startQuiz()">
+       Start The Exam <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- 2. Interactive Exam Screen -->
+    <div id="quiz-view" style="display: none;">
+      <div class="top-bar">
+        <div class="student-badge">
+          <i class="fa-solid fa-user-circle" style="color: #818cf8;"></i>
+          <span id="display-name">Student</span>
+        </div>
+        <span class="progress-pill" id="progress-text">Question 1/80</span>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <!-- Question Title Box -->
+      <div class="question-box" id="question-title">Question loading...</div>
+
+      <!-- Options Grid -->
+      <div class="options-grid" id="options-grid"></div>
+
+      <!-- Navigation & Action Buttons -->
+      <div class="nav-actions">
+        <button class="nav-btn" id="prev-btn" onclick="navigateQuestion(-1)">
+          <i class="fa-solid fa-chevron-left"></i> Previous 
+        </button>
+
+        <button class="nav-btn skip-btn" id="skip-btn" onclick="skipCurrentQuestion()">
+          <i class="fa-solid fa-forward"></i> Skip
+        </button>
+
+        <button class="nav-btn" id="next-btn" onclick="navigateQuestion(1)">
+          Next <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <button class="submit-exam-btn" id="submit-btn" onclick="openSubmitModal()">
+          <i class="fa-solid fa-paper-plane"></i> Submit
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Dynamic Results Screen -->
+    <div class="result-screen" id="result-view">
+      <div class="badge-tag" id="performance-badge">
+        <i class="fa-solid fa-trophy"></i> Results are ready
+      </div>
+      <h2 style="font-size: 26px; font-weight: 700; margin-top: 8px;">Results Description</h2>
+      <p style="color: var(--text-muted); font-size: 14px;">'quiz_results 8' are saved in database</p>
+      
+      <div class="score-circle">
+        <div class="number" id="final-score">০.০০</div>
+        <span style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Total Number / 80</span>
+      </div>
+
+      <div class="score-details-grid">
+        <div class="stat-card">
+          <div class="val" style="color: var(--correct-text);" id="correct-count">০</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Right (+1.00)</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color: var(--wrong-text);" id="wrong-count">০</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Wrong(-0.25)</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color: var(--skipped-text);" id="skipped-count">০</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Skip (0)</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" style="color: #a5b4fc;" id="accuracy-rate">০%</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Accuracy</div>
+        </div>
+      </div>
+
+      <h3 style="text-align: left; font-size: 16px; margin-top: 20px; color: #cbd5e1;">Ans and solve review:</h3>
+      <div class="review-section" id="review-list"></div>
+    </div>
+
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-overlay" id="submit-modal">
+    <div class="modal-content">
+      <i class="fa-solid fa-circle-exclamation" style="font-size: 48px; color: #f59e0b; margin-bottom: 12px;"></i>
+      <h3 style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px;">Do you want to finish the exam?</h3>
+      <p id="modal-summary-text" style="color: var(--text-muted); font-size: 14px;">submit all question ans</p>
+      
+      <div class="modal-actions">
+        <button class="nav-btn" onclick="closeSubmitModal()">back to previous</button>
+        <button class="submit-exam-btn" style="display:inline-block;" onclick="finalizeExam()">Yes, Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTgSqtcDRtvfbIECDFEv_2jAEgModArXc",
+      authDomain: "gk-exam-2.firebaseapp.com",
+      projectId: "gk-exam-2",
+      storageBucket: "gk-exam-2.firebasestorage.app",
+      messagingSenderId: "52008698353",
+      appId: "1:52008698353:web:08a24e1451711ab72f0450",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 80 Questions
+    const questionsDatabase = [
+{ question: "1. ‘Artisan’ শব্দের বাংলা পরিভাষা কোনটি?", options: ["কারিগর", "কৃত্রিমতা", "গ্রন্থন", "কারুশিল্প"], correct: 0 },
+{ question: "2. আভিধানিক ক্রম অনুসারে সাজানো শব্দগুচ্ছ কোনটি?", options: ["অংশত, অংশন, অংশিত", "আশা, আলো, আসমান", "ইলিশ, ইতিহাস, ইমারত", "উঠ, উচ্চ, উঠতি"], correct: 0 },
+{ question: "3. ‘এই তো সাধনার সার্থকতা’—এতে কোন দৃষ্টিভঙ্গি প্রতিফলিত হয়েছে?", options: ["ভোগবাদী", "বাস্তববাদী ও কল্যাণমুখী", "নৈরাশ্যবাদী", "রোমান্টিক"], correct: 1 },
+{ question: "4. ‘অশ্বের চালক’-এর এককথায় প্রকাশ কোনটি?", options: ["জকি", "কাঁধি", "সাদি", "ঘটক"], correct: 2 },
+{ question: "5. ‘অণুবীক্ষণ’ শব্দটিতে অক্ষর কয়টি?", options: ["তিন", "চার", "পাঁচ", "ছয়"], correct: 1 },
+{ question: "6. কবিতায় ‘প্রতিদান’ শব্দটি কোন অর্থে ব্যবহৃত হয়েছে?", options: ["অনিষ্টকারীকে ক্ষমা প্রদান", "বাসযোগ্য সুন্দর পৃথিবী নির্মাণ", "অনিষ্টকারীকে শান্তি প্রদান", "অপকারীর উপকার"], correct: 3 },
+{ question: "7. ‘বচন’ ব্যাকরণের কোন অংশের আলোচ্য বিষয়?", options: ["ধ্বনিতত্ত্ব", "বাক্যতত্ত্ব", "শব্দতত্ত্ব", "পদক্রম"], correct: 2 },
+{ question: "8. ‘তমিস্রা’ শব্দের সমার্থক শব্দ কোনটি?", options: ["মনোরঞ্জন", "তোষামোদ", "নাট্যাভিনয়", "অন্ধকার"], correct: 3 },
+{ question: "9. ‘ক্ষ’ যুক্তব্যঞ্জনের বিশ্লিষ্ট রূপ কোনটি?", options: ["ক্ + ষ", "হ্ + ণ", "ঞ্ + চ", "ঙ্ + ক"], correct: 0 },
+{ question: "10. বৃক্ষের সঙ্গে সৃজনশীল মানুষের তুলনার মূল ভিত্তি কী?", options: ["সৌন্দর্য", "স্থায়িত্ব", "প্রাপ্তি ও দানের ঐক্য", "বৃদ্ধি"], correct: 2 },
+{ question: "11. কোন ধ্বনিটি উচ্চারণের সময় বাতাসের চাপের স্বল্পতা থাকে?", options: ["ড", "ঘ", "ঝ", "ঠ"], correct: 0 },
+{ question: "12. কবি ‘বিষে-ভরা বাণ’-এর বিনিময়ে কী দিতে চেয়েছেন?", options: ["ফুল মালঞ্চ", "ভালোবাসা", "বুকভরা গান", "মমতা"], correct: 2 },
+{ question: "13. ‘প্রাপ্তি ও দান এক হয়ে গেছে’—উক্তিটি কার ক্ষেত্রে প্রযোজ্য?", options: ["নদী", "মানুষ", "বৃক্ষ", "প্রাণী"], correct: 2 },
+{ question: "14. জসীমউদ্দীনের কবিতার প্রধান উপজীব্য কী?", options: ["নগরজীবন", "পল্লিজীবন", "শহুরে জীবন", "মধ্যবিত্ত জীবন"], correct: 1 },
+{ question: "15. “As you sow, so you reap”—বাক্যটির সঠিক বাংলা কোনটি?", options: ["লোভে পাপ, পাপে মৃত্যু", "যত গর্জে তত বর্ষে না", "যার নুন খাও, তার গুণ গাও", "যেমন কর্ম, তেমন ফল"], correct: 3 },
+{ question: "16. সিরাজগঞ্জে কাজী নজরুল ইসলাম কখন ভাষণ দেন?", options: ["১৯৩০ সালে", "১৯৩২ সালে", "১৯৩৪ সালে", "১৯৪২ সালে"], correct: 1 },
+{ question: "17. ‘গঙ্গার পাখি’কে বায়স কী দিয়ে আঘাত করে?", options: ["তীক্ষ্ণ চঞ্চু দিয়ে", "তীক্ষ্ণ ডানা দিয়ে", "তীক্ষ্ণ নখ দিয়ে", "তীক্ষ্ণ পা দিয়ে"], correct: 0 },
+{ question: "18. ‘মধ্যাহ্ন’ শব্দের সঠিক উচ্চারণ কোনটি?", options: ["মোদ্‌ধান্‌হো", "মধ্যান", "মান্‌না", "মদ্‌ধান্‌হো"], correct: 0 },
+{ question: "19. ‘আমি বক্তাও নহি। আমি কমবক্তার দলে’—উক্তিটির তাৎপর্য কোনটি?", options: ["প্রাবন্ধিক কম কথায় বিশ্বাসী", "কথায় নয়, কাজে বিশ্বাসী", "কম কথার গুরুত্ব বেশি", "কাজে নয়, কথায় বিশ্বাসী"], correct: 0 },
+{ question: "20. ‘বিদ্রোহী’ কবিতায় কবি কার অভিশাপ হতে চেয়েছেন?", options: ["উৎপীড়িতের", "পৃথ্বীর", "বিধাতার", "নিজের"], correct: 1 },
+{ question: "21. Sanford Brokaw --- the Neighbourhood Playhouse in New York City.", options: ["founding and directing", "who founded and directed", "found and directed", "founded and directed"], correct: 3 },
+{ question: "22. 'The headmaster made her feel safe and happy.' This sentence shows that the headmaster was ---", options: ["Harsh", "Proud", "Compassionate", "Careless"], correct: 2 },
+{ question: "23. Which of the following sentences is correct?", options: ["Tell me what is life.", "Tell me how is life.", "Tell me what life is.", "Do you know what is life?"], correct: 2 },
+{ question: "24. Blind fish --- their entire life in caves have neither eyes nor ears.", options: ["that spends", "that spend", "to spend", "that spending"], correct: 1 },
+{ question: "25. What time ---?", options: ["begins the film", "does begin the film", "does the film begin", "does the film begins"], correct: 2 },
+{ question: "26. Which one is incorrectly spelt?", options: ["Abundance", "Abbreviate", "Accessories", "Acquaintence"], correct: 3 },
+{ question: "27. Which of the following is a correct simple sentence?", options: ["All that glitters is not gold.", "All is well that ends well.", "Do or die.", "I saw an old man walking past me."], correct: 3 },
+{ question: "28. The correct translation of 'সে আমার মনের মত লোক' is ---", options: ["He is a man of my mind.", "He is a man to my mind.", "He is a man like my mind.", "He is a man of my hearts."], correct: 1 },
+{ question: "29. Steps have been taken to ameliorate the situation. The word 'ameliorate' refers to ---", options: ["Precise", "Improve", "Deteriorate", "Hesitate"], correct: 1 },
+{ question: "30. Choose the word that gives the opposite meaning of 'abstruse'.", options: ["Vague", "Clear", "Cleaver", "Harsh"], correct: 1 },
+{ question: "31. The meaning of 'maladroit' is ---", options: ["Dexterous", "Negligent", "Inept", "Skilful"], correct: 2 },
+{ question: "32. The expression 'after one's own heart' means ---", options: ["To be in low spirit", "To be in high spirit", "With complete devotion", "To one's own liking"], correct: 3 },
+{ question: "33. Instead of 'win' we can say ---", options: ["Break out", "Bear with", "Bear away", "Blow up"], correct: 2 },
+{ question: "34. This song was adapted --- school girls --- a book written by Kazi Nazrul Islam.", options: ["of, in", "for, the", "for, from", "by, on"], correct: 2 },
+{ question: "35. Choose the correct sentence.", options: ["I shall avail the opportunity.", "I shall avail to the opportunity.", "I shall avail for the opportunity.", "I shall avail myself of the opportunity."], correct: 3 },
+{ question: "36. The CEO interviewed several candidates --- had the experience and qualifications.", options: ["who she thought", "whom she thought", "of whom she thought", "whoever she thoughts"], correct: 0 },
+{ question: "37. A cardiologist treats patients with --- problems.", options: ["Kidney", "Stomach", "Heart", "Urine"], correct: 2 },
+{ question: "38. Manufacturers of consumer goods often change --- the styles of their products.", options: ["that spends", "that spend", "to spend", "that spending"], correct: 3 },
+{ question: "39. 'My flowers were begging for water' is an example of ---", options: ["Metaphor", "Personification", "Hyperbole", "Imagery"], correct: 1 },
+{ question: "40. Which of the following sentences is correct?", options: ["Do you know who the house belong to?", "Do you know whom does the house belong to?", "Do you know who the house belongs to?", "Do you know to whom the house belongs to?"], correct: 2 },
+{ question: "41. বাংলাদেশ-ভারত আন্তঃসীমান্ত নদী কতটি?", options: ["৫৭টি", "৫৪টি", "৫৮টি", "৬০টি"], correct: 1 },
+{ question: "42. বাংলাদেশে উৎপত্তি হয়ে বাংলাদেশে শেষ হয়েছে কোন নদী?", options: ["হালদা", "সাঙ্গু", "নাফ", "মাতামুহুরি"], correct: 0 },
+{ question: "43. বাংলাদেশের নবীনতম নদী কোনটি?", options: ["ব্রহ্মপুত্র", "তিস্তা", "ভৈরব", "যমুনা"], correct: 3 },
+{ question: "44. বাংলার সুয়েজখাল বলা হয় কোনটিকে?", options: ["নাফ নদী", "গড়াই নদী", "গাবখান চ্যানেল", "ফেনী নদী"], correct: 2 },
+{ question: "45. নিচের কোনটি যমুনার উপনদী নয়?", options: ["করতোয়া", "আত্রাই", "ধলেশ্বরী", "তিস্তা"], correct: 2 },
+{ question: "46. কর্ণফুলী নদীর উৎপত্তি কোথা থেকে?", options: ["মণিপুর", "আরাকান", "ত্রিপুরা", "মিজোরাম"], correct: 3 },
+{ question: "47. ‘খনার বচন’ কী?", options: ["কৃষিবিষয়ক উপদেশ", "পরিবেশ ও আবহাওয়াবিষয়ক কথা", "দুর্যোগের পূর্বাভাস ও স্বাস্থ্যকথা", "উপরের সবগুলো"], correct: 3 },
+{ question: "48. মঙ্গল শোভাযাত্রার বর্তমান নাম কী?", options: ["বর্ষবরণ ও মঙ্গল শোভাযাত্রা", "আনন্দ শোভাযাত্রা", "বর্ষবরণ আনন্দ শোভাযাত্রা", "বৈশাখী উৎসব ও বাঙালিয়ানা"], correct: 2 },
+{ question: "49. পাট উৎপাদনে বিশ্বে বাংলাদেশের অবস্থান কততম?", options: ["১ম", "২য়", "৩য়", "৪র্থ"], correct: 1 },
+{ question: "50. বাংলাদেশের প্রথম চা-বাগান প্রতিষ্ঠিত হয় কোথায়?", options: ["সিলেট", "চট্টগ্রাম", "মৌলভীবাজার", "পঞ্চগড়"], correct: 0 },
+{ question: "51. পাট উৎপাদনে শীর্ষে কোন জেলা?", options: ["টাঙ্গাইল", "ঝিনাইদহ", "চাঁপাইনবাবগঞ্জ", "ফরিদপুর"], correct: 3 },
+{ question: "52. বাংলাদেশের কোন সাংস্কৃতিক ঐতিহ্যটি সর্বশেষ স্বীকৃতি পেয়েছে?", options: ["জামদানি", "বাউল সংগীত", "রিকশা", "টাঙ্গাইল শাড়ি বুনন"], correct: 3 },
+{ question: "53. জলচুপি কোন ফসলের নাম?", options: ["টমেটো", "তরমুজ", "আনারস", "আম"], correct: 2 },
+{ question: "54. নিচের কোনটি সমুদ্র উপকূলবর্তী গ্যাসক্ষেত্র?", options: ["সুনেত্র", "ছাতক", "বিবিয়ানা", "কুতুবদিয়া"], correct: 3 },
+{ question: "55. খালাশপীর কয়লাক্ষেত্র কোন জেলায় অবস্থিত?", options: ["দিনাজপুর", "জয়পুরহাট", "সুনামগঞ্জ", "রংপুর"], correct: 3 },
+{ question: "56. নিচের কোন জেলায় চীনামাটি পাওয়া যায় না?", options: ["নেত্রকোনা", "দিনাজপুর", "নওগাঁ", "চট্টগ্রাম"], correct: 1 },
+{ question: "57. ‘চাপালিশ’ কোন বনভূমির গাছ?", options: ["ক্রান্তীয় চিরহরিৎ বনভূমি (সিলেট-চট্টগ্রাম)", "ক্রান্তীয় পত্রপতনশীল বনভূমি (মধুপুর-বরেন্দ্রভূমি)", "স্রোতজ বনভূমি (সুন্দরবন)", "সোয়াম্প ফরেস্ট (রাতারগুল)"], correct: 0 },
+{ question: "58. বর্তমানে সুন্দরবনে বাঘের সংখ্যা কতটি?", options: ["১১৫টি", "১২০টি", "১২৫টি", "১৩০টি"], correct: 2 },
+{ question: "59. বাংলাদেশের প্রথম রামসার সাইট কত সালে ঘোষিত হয়?", options: ["১৯৯০ সালে", "১৯৯২ সালে", "২০০০ সালে", "২০০২ সালে"], correct: 1 },
+{ question: "60. মোংলা সমুদ্রবন্দর কোন নদীর তীরে অবস্থিত?", options: ["পশুর নদী", "কর্ণফুলী নদী", "আন্ধারমানিক নদী", "রূপসা নদী"], correct: 0 },
+{ question: "61. উন্নত জাতের চিংড়ি কোনটি?", options: ["গলদা", "বাগদা", "ব্ল্যাক টাইগার", "ভেনামি"], correct: 3 },
+{ question: "62. বাংলাদেশের বৃহত্তম সেচ প্রকল্প কোনটি?", options: ["তিস্তা", "করতোয়া", "বুড়িগঙ্গা", "পদ্মা"], correct: 0 },
+{ question: "63. মাতৃতান্ত্রিক পরিবারভুক্ত উপজাতি কোন জেলায় বাস করে না?", options: ["টাঙ্গাইল", "ময়মনসিংহ", "সিলেট", "চট্টগ্রাম"], correct: 3 },
+{ question: "64. কাদেরকে ‘মনতং বা মঞ্জুং’ বলা হয়?", options: ["পাঙন", "বেদে", "হাজং", "মুরং"], correct: 1 },
+{ question: "65. সোহরাই কাদের উৎসব?", options: ["গারো", "সাঁওতাল", "রাখাইন", "খিয়াং"], correct: 1 },
+{ question: "66. বাংলাদেশে বসবাসকারী ক্ষুদ্র নৃগোষ্ঠীদের মধ্যে কারা প্রকৃতিপূজারী?", options: ["গারো", "হাজং", "রাজবংশী", "রাখাইন"], correct: 2 },
+{ question: "67. কোন স্থলবন্দর সরাসরি সরকার কর্তৃক নিয়ন্ত্রিত?", options: ["বেনাপোল", "টেকনাফ", "বাংলাবান্ধা", "তামাবিল"], correct: 0 },
+{ question: "68. বাংলাদেশের একমাত্র রেলওয়ে কারখানা কোথায়?", options: ["কমলাপুর", "সৈয়দপুর", "রংপুর", "দিনাজপুর"], correct: 1 },
+{ question: "69. MRT Line-6-এ উত্তরা থেকে মতিঝিল পর্যন্ত কতটি স্টেশন রয়েছে?", options: ["১৬টি", "১৭টি", "১৫টি", "১৮টি"], correct: 0 },
+{ question: "70. গ্রামাঞ্চলে বিদ্যুৎ বিতরণের জন্য কোন প্রতিষ্ঠান কাজ করে?", options: ["DESCO", "DPDC", "REB", "NESCO"], correct: 2 },
+{ question: "71. ২০২৬-২৭ অর্থবছরের জাতীয় বাজেটের মোট আকার কত?", options: ["৯ লাখ ৩৮ হাজার কোটি টাকা", "৭ লাখ ৯৭ হাজার কোটি টাকা", "৮ লাখ ৫০ হাজার কোটি টাকা", "৯ লাখ কোটি টাকা"], correct: 0 },
+{ question: "72. ২০২৬ সালের বর্তমান তথ্য অনুযায়ী বাংলাদেশের রাষ্ট্রপতি কে?", options: ["মোহাম্মদ সাহাবুদ্দিন", "মির্জা ফখরুল ইসলাম আলমগীর", "ড. মুহাম্মদ ইউনূস", "তারেক রহমান"], correct: 1 },
+{ question: "73. ২০২৬ সালের হিসাব অনুযায়ী বাংলাদেশের প্রধানমন্ত্রী কে?", options: ["শেখ হাসিনা", "তারেক রহমান", "খালেদা জিয়া", "মির্জা ফখরুল ইসলাম আলমগীর"], correct: 1 },
+{ question: "74. বাংলা নববর্ষ ১৪৩২ (২০২৫ সাল) থেকে মঙ্গল শোভাযাত্রার নতুন নাম কী দেওয়া হয়েছে?", options: ["বৈশাখী আনন্দ শোভাযাত্রা", "বর্ষবরণ আনন্দ শোভাযাত্রা", "বাঙালি উৎসব ও শোভাযাত্রা", "পহেলা বৈশাখ শোভাযাত্রা"], correct: 1 },
+{ question: "75. বাংলাদেশের সর্বশেষ (১৩তম) সিটি কর্পোরেশন কোনটি?", options: ["ময়মনসিংহ সিটি কর্পোরেশন", "গাজীপুর সিটি কর্পোরেশন", "বগুড়া সিটি কর্পোরেশন", "ফরিদপুর সিটি কর্পোরেশন"], correct: 2 },
+{ question: "76. জুলাই গণ-অভ্যুত্থানে প্রবাসী বাংলাদেশিদের ভূমিকা নিয়ে নির্মিত আন্তর্জাতিক পুরস্কারপ্রাপ্ত প্রামাণ্যচিত্রটির নাম কী?", options: ["জুলাই ডায়েরি", "দ্য রাইজ", "রেড জুলাই", "আমাদ'স ড্রিম"], correct: 3 },
+{ question: "77. ২০২৪ সালের জুলাই বিপ্লবের বীরদের স্মৃতি ও ইতিহাস সংরক্ষণের জন্য সাবেক প্রধানমন্ত্রীর সরকারি বাসভবন 'গণভবন'-কে কী করার সিদ্ধান্ত নেওয়া হয়েছে?", options: ["জুলাই গণঅভ্যুত্থান স্মৃতি জাদুঘর", "জুলাই স্মৃতি সংসদ", "স্বাধীনতা জাদুঘর", "অভ্যুত্থান গবেষণা কেন্দ্র"], correct: 0 },
+{ question: "78. বাংলাদেশ রাজনৈতিক ঐকমত্যভিত্তিক গণতান্ত্রিক সংস্কার প্রস্তাবনাসংবলিত 'জুলাই সনদ' কবে স্বাক্ষরিত হয়?", options: ["৫ আগস্ট, ২০২৫", "১৭ অক্টোবর, ২০২৫", "৩১ জুলাই, ২০২৫", "১৬ ডিসেম্বর, ২০২৫"], correct: 1 },
+{ question: "79. ফ্যামিলি কার্ড বিতরণ কার্যক্রম আনুষ্ঠানিকভাবে কবে থেকে শুরু হয়?", options: ["১০ মার্চ, ২০২৬", "১১ মার্চ, ২০২৬", "৯ মার্চ, ২০২৬", "১২ মার্চ, ২০২৬"], correct: 0 },
+{ question: "80. MRT Line-6-এর উত্তরা থেকে মতিঝিল পর্যন্ত বর্তমানে কতটি স্টেশন রয়েছে?", options: ["১৫টি", "১৬টি", "১৭টি", "১৮টি"], correct: 1 },
+    ];
+
+    let userName = "";
+    let currentIndex = 0;
+    
+    let questionStates = new Array(questionsDatabase.length).fill(null);
+    let userSelections = new Array(questionsDatabase.length).fill(null);
+
+    function handleEnter(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        startQuiz();
+      }
+    }
+
+    function startQuiz() {
+      const inputVal = document.getElementById('user-name').value.trim();
+      if (!inputVal) {
+        alert("অনুগ্রহ করে আপনার নাম প্রদান করুন!");
+        return;
+      }
+      userName = inputVal;
+      document.getElementById('display-name').innerText = userName;
+      document.getElementById('user-info-view').style.display = 'none';
+      document.getElementById('quiz-view').style.display = 'block';
+
+      loadQuestion(0);
+    }
+
+    function loadQuestion(index) {
+      currentIndex = index;
+      const qData = questionsDatabase[currentIndex];
+
+      document.getElementById('progress-text').innerText = `Question ${currentIndex + 1}/${questionsDatabase.length}`;
+      document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / questionsDatabase.length) * 100}%`;
+      document.getElementById('question-title').innerText = qData.question;
+
+      // Update Nav Buttons State
+      document.getElementById('prev-btn').disabled = (currentIndex === 0);
+      document.getElementById('next-btn').disabled = (currentIndex === questionsDatabase.length - 1);
+
+      // Submit btn sudu 80 no. prosthne
+      const submitBtn = document.getElementById('submit-btn');
+      if (currentIndex === questionsDatabase.length - 1) {
+        submitBtn.style.display = 'inline-block';
+      } else {
+        submitBtn.style.display = 'none';
+      }
+
+      const optionsGrid = document.getElementById('options-grid');
+      optionsGrid.innerHTML = '';
+
+      const isAnswered = (userSelections[currentIndex] !== null);
+      const userSelectedOpt = userSelections[currentIndex];
+
+      // Render Options
+      qData.options.forEach((opt, optIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        
+        let iconHtml = '<i class="fa-regular fa-circle"></i>';
+
+        if (isAnswered) {
+          btn.disabled = true;
+          btn.classList.add('disabled-opt');
+
+          if (optIdx === qData.correct) {
+            btn.classList.add('correct-opt');
+            iconHtml = '<i class="fa-solid fa-circle-check"></i>';
+          } else if (optIdx === userSelectedOpt) {
+            btn.classList.add('wrong-opt');
+            iconHtml = '<i class="fa-solid fa-circle-xmark"></i>';
+          }
+        }
+
+        btn.innerHTML = `<span>${opt}</span> ${iconHtml}`;
+        btn.onclick = () => selectOption(optIdx);
+        optionsGrid.appendChild(btn);
+      });
+    }
+
+    function selectOption(optionIdx) {
+      if (userSelections[currentIndex] !== null) return;
+
+      userSelections[currentIndex] = optionIdx;
+      questionStates[currentIndex] = 'answered';
+
+      loadQuestion(currentIndex);
+    }
+
+    function skipCurrentQuestion() {
+      if (userSelections[currentIndex] === null) {
+        questionStates[currentIndex] = 'skipped';
+      }
+      if (currentIndex < questionsDatabase.length - 1) {
+        loadQuestion(currentIndex + 1);
+      }
+    }
+
+    function navigateQuestion(direction) {
+      const newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < questionsDatabase.length) {
+        loadQuestion(newIndex);
+      }
+    }
+
+    function openSubmitModal() {
+      let answeredCount = questionStates.filter(s => s === 'answered').length;
+      let skippedCount = questionStates.filter(s => s === 'skipped').length;
+      let unvisitedCount = questionsDatabase.length - (answeredCount + skippedCount);
+
+      document.getElementById('modal-summary-text').innerText = 
+        `Given answer: ${answeredCount}টি | skip: ${skippedCount}টি | Remaining: ${unvisitedCount}টি`;
+
+      document.getElementById('submit-modal').classList.add('active');
+    }
+
+    function closeSubmitModal() {
+      document.getElementById('submit-modal').classList.remove('active');
+    }
+
+    function finalizeExam() {
+      closeSubmitModal();
+      document.getElementById('quiz-view').style.display = 'none';
+      document.getElementById('result-view').style.display = 'block';
+
+      let correct = 0;
+      let wrong = 0;
+      let skipped = 0;
+      let wrongQuestionsList = [];
+
+      const reviewList = document.getElementById('review-list');
+      reviewList.innerHTML = '';
+
+      questionsDatabase.forEach((q, idx) => {
+        const selected = userSelections[idx];
+        const isAnswered = selected !== null;
+        const isCorrect = isAnswered && selected === q.correct;
+        const isWrong = isAnswered && selected !== q.correct;
+
+        if (isCorrect) {
+          correct++;
+        } else if (isWrong) {
+          wrong++;
+          wrongQuestionsList.push({
+            questionNo: idx + 1,
+            questionText: q.question,
+            givenAnswer: q.options[selected],
+            correctAnswer: q.options[q.correct]
+          });
+        } else {
+          skipped++;
+        }
+
+        const item = document.createElement('div');
+        let statusClass = isCorrect ? 'is-correct' : (isWrong ? 'is-wrong' : 'is-skipped');
+        item.className = `review-item ${statusClass}`;
+
+        let selectedText = isAnswered ? q.options[selected] : 'উত্তর দেওয়া হয়নি (স্কিপড)';
+        let correctText = q.options[q.correct];
+
+        item.innerHTML = `
+          <div class="review-q">${q.question}</div>
+          <div class="review-ans">
+            <span>your answer: <strong style="color: ${isCorrect ? 'var(--correct-text)' : (isWrong ? 'var(--wrong-text)' : 'var(--skipped-text)')}">${selectedText}</strong></span>
+            ${!isCorrect ? `<span>Right answer: <strong style="color: var(--correct-text)">${correctText}</strong></span>` : ''}
+          </div>
+        `;
+        reviewList.appendChild(item);
+      });
+
+      let totalScore = (correct * 1.0) - (wrong * 0.25);
+      if (totalScore < 0) totalScore = 0;
+
+      let answeredTotal = correct + wrong;
+      let accuracy = answeredTotal > 0 ? ((correct / answeredTotal) * 100).toFixed(1) : 0;
+
+      document.getElementById('final-score').innerText = totalScore.toFixed(2);
+      document.getElementById('correct-count').innerText = correct;
+      document.getElementById('wrong-count').innerText = wrong;
+      document.getElementById('skipped-count').innerText = skipped;
+      document.getElementById('accuracy-rate').innerText = `${accuracy}%`;
+
+      const perfBadge = document.getElementById('performance-badge');
+      if (totalScore >= 60) {
+        perfBadge.innerHTML = `<i class="fa-solid fa-trophy"></i> চমৎকার প্রস্তুতি! (Outstanding)`;
+      } else if (totalScore >= 40) {
+        perfBadge.innerHTML = `<i class="fa-solid fa-medal"></i> ভালো ফলাফল (Good Job)`;
+      } else {
+        perfBadge.innerHTML = `<i class="fa-solid fa-book-open"></i> আরও অনুশীলন প্রয়োজন`;
+      }
+
+      db.collection("quiz_results 10").add({
+        studentName: userName,
+        totalScore: totalScore.toFixed(2),
+        correctAnswers: correct,
+        wrongAnswers: wrong,
+        skippedQuestions: skipped,
+        accuracyPercentage: accuracy,
+        wrongQuestionsBreakdown: wrongQuestionsList,
+        submittedAt: new Date().toISOString()
+      })
+      .then(() => console.log("Result saved to Firestore 'quiz_results 8' successfully!"))
+      .catch((err) => console.error("Firestore Save Error: ", err));
+    }
+  </script>
+</body>
+</html>
